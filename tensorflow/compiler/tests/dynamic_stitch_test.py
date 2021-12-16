@@ -41,9 +41,7 @@ class DynamicStitchTest(xla_test.XLATestCase):
         output = data_flow_ops.dynamic_stitch(index_placeholders,
                                               data_placeholders)
 
-      feed_dict = {}
-      for placeholder, value in zip(index_placeholders, indices):
-        feed_dict[placeholder] = value
+      feed_dict = dict(zip(index_placeholders, indices))
       for placeholder, value in zip(data_placeholders, data):
         feed_dict[placeholder] = value
       result = session.run(output, feed_dict=feed_dict)

@@ -44,8 +44,7 @@ class CategoricalTest(xla_test.XLATestCase):
     actual = np.asarray(actual)
     expected = np.asarray(expected)
     diff = actual - expected
-    chi2 = np.sum(diff * diff / expected)
-    return chi2
+    return np.sum(diff * diff / expected)
 
   def _do_sampling(self, logits, num_samples):
     """Categorical samples from given input.

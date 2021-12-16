@@ -121,8 +121,7 @@ class ReduceOpsTest(xla_test.XLATestCase, parameterized.TestCase):
       if inp.shape[axis] == 0:
         if np.issubdtype(dtype, np.floating):
           return np.full(inp.shape[0:axis] + inp.shape[axis + 1:], float('inf'))
-        return np.full(inp.shape[0:axis] + inp.shape[axis + 1:],
-                       np.iinfo(dtype).max)
+        return np.full(inp.shape[:axis] + inp.shape[axis + 1:], np.iinfo(dtype).max)
       return np.amin(inp, axis)
 
     for dtype in set(self.all_types).intersection(
@@ -139,8 +138,7 @@ class ReduceOpsTest(xla_test.XLATestCase, parameterized.TestCase):
         if np.issubdtype(dtype, np.floating):
           return np.full(inp.shape[0:axis] + inp.shape[axis + 1:],
                          float('-inf'))
-        return np.full(inp.shape[0:axis] + inp.shape[axis + 1:],
-                       np.iinfo(dtype).min)
+        return np.full(inp.shape[:axis] + inp.shape[axis + 1:], np.iinfo(dtype).min)
       return np.amax(inp, axis)
 
     for dtype in set(self.all_types).intersection(

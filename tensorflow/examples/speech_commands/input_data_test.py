@@ -251,12 +251,10 @@ class InputDataTest(test.TestCase):
       sample_data = np.zeros([desired_samples, 1])
       for i in range(desired_samples):
         phase = i % 4
-        if phase == 0:
+        if phase in [0, 2]:
           sample_data[i, 0] = 0
         elif phase == 1:
           sample_data[i, 0] = -1
-        elif phase == 2:
-          sample_data[i, 0] = 0
         elif phase == 3:
           sample_data[i, 0] = 1
       test_wav_path = os.path.join(tmp_dir, "test_wav.wav")

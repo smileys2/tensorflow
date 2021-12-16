@@ -151,8 +151,7 @@ def transform_esp_sources(input_lines, flags):
       line = replace_esp_example_includes(line, flags.source_path)
     output_lines.append(line)
 
-  output_text = '\n'.join(output_lines)
-  return output_text
+  return '\n'.join(output_lines)
 
 
 def main(unused_args, flags):

@@ -47,8 +47,7 @@ flags.DEFINE_bool('gen_register_op', True,
 # and prints out the current graph def version.
 @Composite('TestAttr')
 def _override_test_attr_op():
-  ret = array_ops.Const(value=100.0, dtype=dtypes.float32)
-  return ret
+  return array_ops.Const(value=100.0, dtype=dtypes.float32)
 
 
 def main(_):

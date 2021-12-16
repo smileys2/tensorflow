@@ -109,9 +109,7 @@ class FunctionTest(xla_test.XLATestCase):
 
       @function.Defun(dtypes.float32, dtypes.int32, dtypes.int32)
       def Foo(a, c, d):
-        # c and d must be known at compile time
-        x = array_ops.slice(a, c, d)
-        return x
+        return array_ops.slice(a, c, d)
 
       a = array_ops.placeholder(dtypes.float32)
       c = array_ops.placeholder(dtypes.int32, shape=[4])

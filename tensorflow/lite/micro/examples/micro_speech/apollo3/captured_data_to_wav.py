@@ -32,9 +32,7 @@ def new_data_to_array(fn):
       if n != 0:
         vals.extend([int(v, 16) for v in line.split()])
   b = ''.join(map(chr, vals))
-  y = struct.unpack('<' + 'h' * int(len(b) / 2), b)
-
-  return y
+  return struct.unpack('<' + 'h' * (len(b) // 2), b)
 
 
 data = 'captured_data.txt'

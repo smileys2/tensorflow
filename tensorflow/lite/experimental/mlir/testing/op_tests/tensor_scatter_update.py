@@ -59,9 +59,7 @@ def make_tensor_scatter_update_tests(options):
   def build_inputs(parameters, sess, inputs, outputs):
     indices = set()
     while len(indices) < parameters["updates_count"]:
-      loc = []
-      for d in parameters["input_shape"]:
-        loc.append(np.random.randint(0, d))
+      loc = [np.random.randint(0, d) for d in parameters["input_shape"]]
       indices.add(tuple(loc))
 
     values = [

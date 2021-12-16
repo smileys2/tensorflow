@@ -39,12 +39,11 @@ flags.DEFINE_string("zone", None, "Name of GCP zone with TPU.")
 
 
 def get_tpu_cluster_resolver():
-  resolver = tpu_cluster_resolver.TPUClusterResolver(
+  return tpu_cluster_resolver.TPUClusterResolver(
       tpu=FLAGS.tpu,
       zone=FLAGS.zone,
       project=FLAGS.project,
   )
-  return resolver
 
 
 def get_tpu_strategy():

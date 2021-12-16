@@ -48,11 +48,8 @@ def prepare_original_data(folder, name, data, file_to_read):  # pylint: disable=
   if folder != "negative":
     with open(file_to_read, "r") as f:
       lines = csv.reader(f)
-      data_new = {}
-      data_new[LABEL_NAME] = folder
-      data_new[DATA_NAME] = []
-      data_new["name"] = name
-      for idx, line in enumerate(lines):  # pylint: disable=unused-variable,redefined-outer-name
+      data_new = {LABEL_NAME: folder, DATA_NAME: [], 'name': name}
+      for line in lines:
         if len(line) == 3:
           if line[2] == "-" and data_new[DATA_NAME]:
             data.append(data_new)
@@ -61,16 +58,13 @@ def prepare_original_data(folder, name, data, file_to_read):  # pylint: disable=
             data_new[DATA_NAME] = []
             data_new["name"] = name
           elif line[2] != "-":
-            data_new[DATA_NAME].append([float(i) for i in line[0:3]])
+            data_new[DATA_NAME].append([float(i) for i in line[:3]])
       data.append(data_new)
   else:
     with open(file_to_read, "r") as f:
       lines = csv.reader(f)
-      data_new = {}
-      data_new[LABEL_NAME] = folder
-      data_new[DATA_NAME] = []
-      data_new["name"] = name
-      for idx, line in enumerate(lines):
+      data_new = {LABEL_NAME: folder, DATA_NAME: [], 'name': name}
+      for line in lines:
         if len(line) == 3 and line[2] != "-":
           if len(data_new[DATA_NAME]) == 120:
             data.append(data_new)
@@ -79,7 +73,7 @@ def prepare_original_data(folder, name, data, file_to_read):  # pylint: disable=
             data_new[DATA_NAME] = []
             data_new["name"] = name
           else:
-            data_new[DATA_NAME].append([float(i) for i in line[0:3]])
+            data_new[DATA_NAME].append([float(i) for i in line[:3]])
       data.append(data_new)
 
 
@@ -114,7 +108,7 @@ def generate_negative_data(data):  # pylint: disable=redefined-outer-name
       dic = {DATA_NAME: [], LABEL_NAME: "negative", "name": "negative7"}
     else:
       dic = {DATA_NAME: [], LABEL_NAME: "negative", "name": "negative6"}
-    for j in range(128):
+    for _ in range(128):
       dic[DATA_NAME].append([(random.random() - 0.5) * 1000,
                              (random.random() - 0.5) * 1000,
                              (random.random() - 0.5) * 1000])
@@ -130,7 +124,7 @@ def generate_negative_data(data):  # pylint: disable=redefined-outer-name
     start_x = (random.random() - 0.5) * 2000
     start_y = (random.random() - 0.5) * 2000
     start_z = (random.random() - 0.5) * 2000
-    for j in range(128):
+    for _ in range(128):
       dic[DATA_NAME].append([
           start_x + (random.random() - 0.5) * 40,
           start_y + (random.random() - 0.5) * 40,
@@ -142,7 +136,7 @@ def generate_negative_data(data):  # pylint: disable=redefined-outer-name
 # Write data to file
 def write_data(data_to_write, path):
   with open(path, "w") as f:
-    for idx, item in enumerate(data_to_write):  # pylint: disable=unused-variable,redefined-outer-name
+    for item in data_to_write:
       dic = json.dumps(item, ensure_ascii=False)
       f.write(dic)
       f.write("\n")
@@ -150,8 +144,8 @@ def write_data(data_to_write, path):
 
 if __name__ == "__main__":
   data = []  # pylint: disable=redefined-outer-name
-  for idx1, folder in enumerate(folders):
-    for idx2, name in enumerate(names):
+  for folder in folders:
+    for name in names:
       prepare_original_data(folder, name, data,
                             "./%s/output_%s_%s.txt" % (folder, folder, name))
   for idx in range(5):

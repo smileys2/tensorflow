@@ -45,7 +45,7 @@ def person_split(whole_data, train_names, valid_names, test_names):  # pylint: d
   train_data = []  # pylint: disable=redefined-outer-name
   valid_data = []  # pylint: disable=redefined-outer-name
   test_data = []  # pylint: disable=redefined-outer-name
-  for idx, data in enumerate(whole_data):  # pylint: disable=redefined-outer-name,unused-variable
+  for data in whole_data:
     if data["name"] in train_names:
       train_data.append(data)
     elif data["name"] in valid_names:

@@ -132,10 +132,10 @@ class CholeskyOpTest(xla_test.XLATestCase):
     self._verifyCholesky(data, atol=1e-4)
 
   def testMatrixConditionNumbers(self):
-    for dtype in self.float_types:
-      condition_number = 1000
-      size = 20
+    condition_number = 1000
+    size = 20
 
+    for dtype in self.float_types:
       # Generate random positive-definite symmetric matrices, and take their
       # Eigendecomposition.
       matrix = np.random.rand(size, size)

@@ -48,7 +48,7 @@ def _parse_array(values, type_fn=str):
 
 def _parse_set(values):
   if values is not None:
-    return set([item for item in six.ensure_str(values).split(",") if item])
+    return {item for item in six.ensure_str(values).split(",") if item}
   return None
 
 
@@ -69,7 +69,7 @@ def _parse_inference_type(value, flag):
     return dtypes.float32
   if value == "INT8":
     return dtypes.int8
-  if value == "UINT8" or value == "QUANTIZED_UINT8":
+  if value in ["UINT8", "QUANTIZED_UINT8"]:
     return dtypes.uint8
   raise ValueError(
       "Unsupported value for `{}` flag. Expected FLOAT, INT8, UINT8, or "
@@ -230,10 +230,8 @@ def _convert_tf1_model(flags):
     if lite.OpsSet.SELECT_TF_OPS not in converter.target_spec.supported_ops:
       raise ValueError("--experimental_select_user_tf_ops can only be set if "
                        "--target_ops contains SELECT_TF_OPS.")
-    user_op_set = set()
-    for op_name in six.ensure_str(
-        flags.experimental_select_user_tf_ops).split(","):
-      user_op_set.add(op_name)
+    user_op_set = set(six.ensure_str(
+        flags.experimental_select_user_tf_ops).split(","))
     converter.target_spec.experimental_select_user_tf_ops = list(user_op_set)
 
   if flags.post_training_quantize:

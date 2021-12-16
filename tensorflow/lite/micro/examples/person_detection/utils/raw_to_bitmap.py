@@ -123,7 +123,7 @@ def parse_file(inputfile, width, height, channels):
   bytes_written = 0
   frame_start = False
   frame_stop = False
-  frame_list = list()
+  frame_list = []
 
   # collect all pixel data into an int array
   for line in inputfile:
@@ -135,20 +135,20 @@ def parse_file(inputfile, width, height, channels):
     elif line == '--- frame ---\n':
       frame_stop = True
 
-    if frame_start and not frame_stop:
-      linelist = re.findall(r"[\w']+", line)
+    if frame_start:
+      if not frame_stop:
+        linelist = re.findall(r"[\w']+", line)
 
-      if len(linelist) != 17:
-        # drop this frame
-        frame_start = False
-        continue
+        if len(linelist) != 17:
+          # drop this frame
+          frame_start = False
+          continue
 
-      for item in linelist[1:]:
-        data[bytes_written] = int(item, base=16)
-        bytes_written += 1
+        for item in linelist[1:]:
+          data[bytes_written] = int(item, base=16)
+          bytes_written += 1
 
-    elif frame_start and frame_stop:
-      if bytes_written == height * width * channels:
+      elif bytes_written == height * width * channels:
         frame_list.append(data)
         frame_start = False
         frame_stop = False

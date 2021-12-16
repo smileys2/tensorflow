@@ -237,10 +237,10 @@ class SignatureRunner(object):
     # TODO(b/184696047): Needs to invoke the actual subgraph instead of main
     #                    graph.
     self._interpreter.invoke()
-    result = {}
-    for output_name, output_index in self._outputs:
-      result[output_name] = self._interpreter.get_tensor(output_index)
-    return result
+    return {
+        output_name: self._interpreter.get_tensor(output_index)
+        for output_name, output_index in self._outputs
+    }
 
 
 @_tf_export('lite.experimental.OpResolverType')
@@ -345,9 +345,10 @@ class Interpreter(object):
       self._custom_op_registerers = []
 
     actual_resolver_type = experimental_op_resolver_type
-    if experimental_preserve_all_tensors and (
-        experimental_op_resolver_type == OpResolverType.AUTO or
-        experimental_op_resolver_type == OpResolverType.BUILTIN):
+    if experimental_preserve_all_tensors and experimental_op_resolver_type in [
+        OpResolverType.AUTO,
+        OpResolverType.BUILTIN,
+    ]:
       actual_resolver_type = OpResolverType.BUILTIN_WITHOUT_DEFAULT_DELEGATES
     op_resolver_id = _get_op_resolver_id(actual_resolver_type)
     if op_resolver_id is None:
@@ -382,7 +383,7 @@ class Interpreter(object):
           _interpreter_wrapper.CreateWrapperFromBuffer(
               model_content, op_resolver_id, custom_op_registerers_by_name,
               custom_op_registerers_by_func, experimental_preserve_all_tensors))
-    elif not model_content and not model_path:
+    elif not model_content:
       raise ValueError('`model_path` or `model_content` must be specified.')
     else:
       raise ValueError('Can\'t both provide `model_path` and `model_content`')
@@ -466,14 +467,12 @@ class Interpreter(object):
     op_inputs = self._interpreter.NodeInputs(op_index)
     op_outputs = self._interpreter.NodeOutputs(op_index)
 
-    details = {
+    return {
         'index': op_index,
         'op_name': op_name,
         'inputs': op_inputs,
         'outputs': op_outputs,
     }
-
-    return details
 
   def _get_tensor_details(self, tensor_index):
     """Gets tensor details.
@@ -512,7 +511,7 @@ class Interpreter(object):
     if not tensor_type:
       raise ValueError('Could not get tensor details')
 
-    details = {
+    return {
         'name': tensor_name,
         'index': tensor_index,
         'shape': tensor_size,
@@ -526,8 +525,6 @@ class Interpreter(object):
         },
         'sparsity_parameters': tensor_sparsity_params
     }
-
-    return details
 
   # Experimental and subject to change
   def _get_ops_details(self):

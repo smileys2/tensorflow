@@ -143,8 +143,7 @@ class AdjustContrastTest(xla_test.XLATestCase):
 
   def _adjustContrastNp(self, x_np, contrast_factor):
     mean = np.mean(x_np, (1, 2), keepdims=True)
-    y_np = mean + contrast_factor * (x_np - mean)
-    return y_np
+    return mean + contrast_factor * (x_np - mean)
 
   def _adjustContrastTf(self, x_np, contrast_factor):
     with self.session():

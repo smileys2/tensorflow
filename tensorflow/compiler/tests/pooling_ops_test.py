@@ -65,8 +65,7 @@ def GetTestConfigs():
   Returns:
     all the valid test configs
   """
-  test_configs = ["NHWC", "NCHW"]
-  return test_configs
+  return ["NHWC", "NCHW"]
 
 
 class PoolingTest(xla_test.XLATestCase):

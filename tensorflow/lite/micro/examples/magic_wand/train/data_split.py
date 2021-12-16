@@ -41,7 +41,7 @@ def read_data(path):
   data = []  # pylint: disable=redefined-outer-name
   with open(path, "r") as f:
     lines = f.readlines()
-    for idx, line in enumerate(lines):  # pylint: disable=unused-variable
+    for line in lines:
       dic = json.loads(line)
       data.append(dic)
   print("data_length:" + str(len(data)))
@@ -54,10 +54,10 @@ def split_data(data, train_ratio, valid_ratio):  # pylint: disable=redefined-out
   valid_data = []  # pylint: disable=redefined-outer-name
   test_data = []  # pylint: disable=redefined-outer-name
   num_dic = {"wing": 0, "ring": 0, "slope": 0, "negative": 0}
-  for idx, item in enumerate(data):  # pylint: disable=unused-variable
-    for i in num_dic:
+  for item in data:
+    for i, value in num_dic.items():
       if item["gesture"] == i:
-        num_dic[i] += 1
+        value += 1
   print(num_dic)
   train_num_dic = {}
   valid_num_dic = {}
@@ -66,7 +66,7 @@ def split_data(data, train_ratio, valid_ratio):  # pylint: disable=redefined-out
     valid_num_dic[i] = int(valid_ratio * num_dic[i])
   random.seed(30)
   random.shuffle(data)
-  for idx, item in enumerate(data):
+  for item in data:
     for i in num_dic:
       if item["gesture"] == i:
         if train_num_dic[i] > 0:

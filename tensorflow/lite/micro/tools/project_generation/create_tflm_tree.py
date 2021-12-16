@@ -37,10 +37,7 @@ import subprocess
 
 
 def _get_dirs(file_list):
-  dirs = set()
-  for filepath in file_list:
-    dirs.add(os.path.dirname(filepath))
-  return dirs
+  return {os.path.dirname(filepath) for filepath in file_list}
 
 
 def _get_file_list(key, makefile_options):

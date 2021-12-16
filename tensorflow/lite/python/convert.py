@@ -301,11 +301,10 @@ def toco_convert_protos(model_flags_str,
   # surfaces errors instead, and can be safely run in-process.
   if enable_mlir_converter or not _toco_from_proto_bin:
     try:
-      model_str = wrap_toco.wrapped_toco_convert(model_flags_str,
+      return wrap_toco.wrapped_toco_convert(model_flags_str,
                                                  toco_flags_str, input_data_str,
                                                  debug_info_str,
                                                  enable_mlir_converter)
-      return model_str
     except Exception as e:
       converter_error = ConverterError(str(e))
       for error_data in _metrics_wrapper.retrieve_collected_errors():
@@ -358,10 +357,7 @@ Alternative, use virtualenv.""")
                                                                     None, None)
   try:
     # Build all input files
-    with _tempfile.NamedTemporaryFile(delete=False) as fp_toco, \
-             _tempfile.NamedTemporaryFile(delete=False) as fp_model, \
-             _tempfile.NamedTemporaryFile(delete=False) as fp_input, \
-             _tempfile.NamedTemporaryFile(delete=False) as fp_debug:
+    with _tempfile.NamedTemporaryFile(delete=False) as fp_toco, _tempfile.NamedTemporaryFile(delete=False) as fp_model, _tempfile.NamedTemporaryFile(delete=False) as fp_input, _tempfile.NamedTemporaryFile(delete=False) as fp_debug:
       toco_filename = fp_toco.name
       input_filename = fp_input.name
       model_filename = fp_model.name
@@ -370,7 +366,7 @@ Alternative, use virtualenv.""")
       fp_model.write(model_flags_str)
       fp_toco.write(toco_flags_str)
       fp_input.write(six.ensure_binary(input_data_str))
-      debug_info_str = debug_info_str if debug_info_str else ""
+      debug_info_str = debug_info_str or ""
       # if debug_info_str contains a "string value", then the call to
       # fp_debug.write(debug_info_str) will fail with the following error
       #
@@ -655,11 +651,7 @@ def build_toco_convert_protos(input_tensors,
     if _requires_input_stats(toco) and quantized_input_stats:
       input_array.mean_value, input_array.std_value = quantized_input_stats[idx]
 
-    if input_shapes is None:
-      shape = input_tensor.shape
-    else:
-      shape = input_shapes[idx]
-
+    shape = input_tensor.shape if input_shapes is None else input_shapes[idx]
     if shape.rank is not None:
       # Create shapes with -1 for unknown dimensions.
       dims = []
@@ -754,12 +746,11 @@ def toco_convert_graph_def(input_data, input_arrays_with_shape, output_arrays,
     for name in control_output_arrays:
       model_flags.control_output_arrays.append(name)
 
-  data = toco_convert_protos(
+  return toco_convert_protos(
       model_flags.SerializeToString(),
       toco_flags.SerializeToString(),
       input_data.SerializeToString(),
       enable_mlir_converter=enable_mlir_converter)
-  return data
 
 
 @convert_phase(Component.CONVERT_TF_TO_TFLITE_MODEL,
@@ -792,13 +783,12 @@ def toco_convert_impl(input_data, input_tensors, output_tensors,
   model_flags, toco_flags, debug_info = build_toco_convert_protos(
       input_tensors, output_tensors, *args, **kwargs)
   debug_info_str = debug_info.SerializeToString() if debug_info else None
-  data = toco_convert_protos(
+  return toco_convert_protos(
       model_flags.SerializeToString(),
       toco_flags.SerializeToString(),
       input_data.SerializeToString(),
       debug_info_str=debug_info_str,
       enable_mlir_converter=enable_mlir_converter)
-  return data
 
 
 @convert_phase(Component.CONVERT_TF_TO_TFLITE_MODEL,
@@ -818,13 +808,12 @@ def convert_saved_model(saved_model_dir=None,
   if saved_model_exported_names:
     model_flags.saved_model_exported_names.extend(saved_model_exported_names)
   toco_flags = build_toco_flags(**kwargs)
-  data = toco_convert_protos(
+  return toco_convert_protos(
       model_flags.SerializeToString(),
       toco_flags.SerializeToString(),
       None,  # input_data, unused
       None,  # debug_info_str, unused
       enable_mlir_converter=True)
-  return data
 
 
 @_tf_export(v1=["lite.toco_convert"])

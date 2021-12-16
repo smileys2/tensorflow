@@ -73,9 +73,6 @@ class TFLiteMetrics(metrics_interface.TFLiteMetricsInterface):
     if model_hash and not model_path or not model_hash and model_path:
       raise ValueError('Both model metadata(model_hash, model_path) should be '
                        'given at the same time.')
-    if model_hash:
-      # TODO(b/180400857): Create stub once the service is implemented.
-      pass
 
   def increase_counter_debugger_creation(self):
     _counter_debugger_creation.get_cell().increase_by(1)

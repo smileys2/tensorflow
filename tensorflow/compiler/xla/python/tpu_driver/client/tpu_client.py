@@ -43,17 +43,16 @@ class TpuBackend(object):
           '`None`. Use `local` to connect to a local TPU or '
           '`grpc://host:port` to connect to a remote TPU.')
 
-    if worker == 'local' or 'local://' in worker:
-      # We usually want to cache for local backends to prevent double
-      # initialization, except where `force` == True.
-      if worker == 'local':
-        worker = 'local://'
-      if force:
-        return _tpu_client.TpuClient.Get(worker)
-      if TpuBackend._local_backend is None:
-        logging.info('Starting the local TPU driver.')
-        TpuBackend._local_backend = _tpu_client.TpuClient.Get(worker)
-      return TpuBackend._local_backend
-    else:
+    if worker != 'local' and 'local://' not in worker:
       # We do not cache for non-local backends.
       return _tpu_client.TpuClient.Get(worker)
+    # We usually want to cache for local backends to prevent double
+    # initialization, except where `force` == True.
+    if worker == 'local':
+      worker = 'local://'
+    if force:
+      return _tpu_client.TpuClient.Get(worker)
+    if TpuBackend._local_backend is None:
+      logging.info('Starting the local TPU driver.')
+      TpuBackend._local_backend = _tpu_client.TpuClient.Get(worker)
+    return TpuBackend._local_backend

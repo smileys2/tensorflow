@@ -68,10 +68,7 @@ def prepare_model_settings(label_count, sample_rate, clip_duration_ms,
     fft_bin_count = 1 + (_next_power_of_two(window_size_samples) / 2)
     average_window_width = int(math.floor(fft_bin_count / feature_bin_count))
     fingerprint_width = int(math.ceil(fft_bin_count / average_window_width))
-  elif preprocess == 'mfcc':
-    average_window_width = -1
-    fingerprint_width = feature_bin_count
-  elif preprocess == 'micro':
+  elif preprocess in ['mfcc', 'micro']:
     average_window_width = -1
     fingerprint_width = feature_bin_count
   else:

@@ -42,8 +42,7 @@ class WhileTest(xla_test.XLATestCase):
     # Define a function for the loop body
     @function.Defun(dtypes.int32)
     def loop_body(step):
-      step_out = step + constant_op.constant(1, dtype=dtypes.int32)
-      return step_out
+      return step + constant_op.constant(1, dtype=dtypes.int32)
 
     # Define a function for the loop condition
     @function.Defun(dtypes.int32)

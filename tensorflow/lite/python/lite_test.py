@@ -69,9 +69,7 @@ class TestModels(LiteTest):
 
   def assertValidDebugInfo(self, debug_info):
     """Verify the DebugInfo is valid."""
-    file_names = set()
-    for file_path in debug_info.files:
-      file_names.add(os.path.basename(file_path))
+    file_names = {os.path.basename(file_path) for file_path in debug_info.files}
     # To make the test independent on how the nodes are created, we only assert
     # the name of this test file.
     self.assertIn('lite_test.py', file_names)

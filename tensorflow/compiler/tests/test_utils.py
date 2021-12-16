@@ -61,8 +61,7 @@ def PermuteDimsBetweenDataFormats(dims, data_format_src, data_format_dst):
     return dims
 
   dim_map = {d: i for i, d in enumerate(data_format_src)}
-  permuted_dims = [dims[dim_map[d]] for d in data_format_dst]
-  return permuted_dims
+  return [dims[dim_map[d]] for d in data_format_dst]
 
 
 _JIT_WARMUP_ITERATIONS = 10
@@ -70,7 +69,7 @@ _JIT_WARMUP_ITERATIONS = 10
 
 def RunWithWarmup(sess, op_to_run, feed_dict, options=None, run_metadata=None):
   """Runs a graph a few times to ensure that its clusters are compiled."""
-  for _ in range(0, _JIT_WARMUP_ITERATIONS):
+  for _ in range(_JIT_WARMUP_ITERATIONS):
     sess.run(op_to_run, feed_dict, options=options)
   return sess.run(
       op_to_run, feed_dict, options=options, run_metadata=run_metadata)

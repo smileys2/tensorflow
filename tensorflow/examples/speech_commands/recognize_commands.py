@@ -160,9 +160,8 @@ class RecognizeCommands(object):
         average_scores[i] += score[i] / how_many_results
 
     # Sort the averaged results in descending score order.
-    sorted_averaged_index_score = []
-    for i in range(self._label_count):
-      sorted_averaged_index_score.append([i, average_scores[i]])
+    sorted_averaged_index_score = [[i, average_scores[i]]
+                                   for i in range(self._label_count)]
     sorted_averaged_index_score = sorted(
         sorted_averaged_index_score, key=lambda p: p[1], reverse=True)
 

@@ -51,7 +51,7 @@ def to_32bit(x):
 
 
 POWS_OF_2 = 2**np.arange(3, 12)
-INNER_DIMS_1D = list((x,) for x in POWS_OF_2)
+INNER_DIMS_1D = [(x,) for x in POWS_OF_2]
 POWS_OF_2 = 2**np.arange(3, 8)  # To avoid OOM on GPU.
 INNER_DIMS_2D = pick_10(itertools.product(POWS_OF_2, POWS_OF_2))
 INNER_DIMS_3D = pick_10(itertools.product(POWS_OF_2, POWS_OF_2, POWS_OF_2))

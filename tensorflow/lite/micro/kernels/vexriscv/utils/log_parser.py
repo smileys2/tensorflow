@@ -75,10 +75,7 @@ def load_regex_parser(filename):
   regex_parser = {}
   for key, val in content.items():
     if isinstance(val, list):
-      regexs = []
-      for pattern in val:
-        regexs.append(re.compile(pattern))
-
+      regexs = [re.compile(pattern) for pattern in val]
       regex_parser[key] = regexs
     else:
       regex_parser[key] = re.compile(val)
