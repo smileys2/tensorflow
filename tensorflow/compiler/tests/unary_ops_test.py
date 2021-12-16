@@ -36,8 +36,8 @@ from tensorflow.python.platform import googletest
 
 def nhwc_to_format(x, data_format):
   """Converts a numpy array from NHWC format to `data_format`."""
-  rank = len(x.shape)
   if data_format == "NCHW":
+    rank = len(x.shape)
     return np.transpose(x, [0, rank - 1] + list(range(1, rank - 1)))
   elif data_format == "NHWC":
     return x

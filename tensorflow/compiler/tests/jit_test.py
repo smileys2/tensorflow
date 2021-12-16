@@ -238,7 +238,7 @@ class JitLaunchTest(test.TestCase):
   def testExplicitMarking(self):
     """Test explicit marking of operators to compile."""
     batch_size = 16
-    image_size = 28 * 28
+    image_size = 28**2
     num_classes = 10
 
     with ops.Graph().as_default():

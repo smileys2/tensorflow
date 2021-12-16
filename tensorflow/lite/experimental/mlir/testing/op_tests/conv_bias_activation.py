@@ -67,19 +67,17 @@ def make_conv_bias_activation_tests(activation_op):
     # use XLA which doesn't have the same restrictions.
     @tf.function(jit_compile=True)
     def add_conv(input_tensor, filter_input, parameters):
-      out = tf.nn.conv2d(
+      return tf.nn.conv2d(
           input_tensor,
           filter_input,
           strides=parameters["strides"],
           dilations=parameters["dilations"],
           padding="VALID",
           data_format=parameters["data_format"])
-      return out
 
     def add_bias_add(data_input, filter_shape):
       bias_input = create_tensor_data(np.float32, (filter_shape[-1],))
-      out = tf.nn.bias_add(data_input, bias_input, data_format="NHWC")
-      return out
+      return tf.nn.bias_add(data_input, bias_input, data_format="NHWC")
 
     def build_graph(parameters):
       """Build a conv graph given `parameters`."""

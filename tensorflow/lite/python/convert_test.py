@@ -190,7 +190,7 @@ class ConvertTestOpHint(test_util.TensorFlowTestCase):
         _extract_graph_summary(graphdef))
     # Find all nodes that are needed by the outputs
     used_node_names = _bfs_for_reachable_nodes(output_nodes, name_to_input_name)
-    return set([name_to_node[node_name].op for node_name in used_node_names])
+    return {name_to_node[node_name].op for node_name in used_node_names}
 
   def _countIdentities(self, nodes):
     """Count the number of "Identity" op types in the list of proto nodes.

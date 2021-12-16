@@ -142,10 +142,7 @@ class Sharding(object):
       ValueError: The tensor to split was smaller in the split dimension than
         the number of devices to split over.
     """
-    if input_shape:
-      shape = input_shape
-    else:
-      shape = tensor.shape.as_list()
+    shape = input_shape or tensor.shape.as_list()
     if (shape[split_dimension] is not None and
         shape[split_dimension] < num_devices):
       raise ValueError('Split dimension was smaller than the required number '
@@ -179,10 +176,7 @@ class Sharding(object):
     if use_sharding_op:
       if assign_tuple_sharding:
         proto = self._create_tuple_proto(num_outputs=1)
-        tensor = tf2xla.sharding(tensor, sharding=proto.SerializeToString())
-      else:
-        tensor = tf2xla.sharding(
-            tensor, sharding=proto.SerializeToString())
+      tensor = tf2xla.sharding(tensor, sharding=proto.SerializeToString())
     elif assign_tuple_sharding or len(tensor.op.outputs) > 1:
       proto = self._get_or_create_tuple_proto(tensor.op)
       # We can't mutate an element of old_proto.tuple_shardings, so create
@@ -344,10 +338,7 @@ def get_op_sharding(op):
   """
   try:
     return op.get_attr('_XlaSharding')
-  except ValueError:
-    return None
-  except AttributeError:
-    # AttributeError: 'DistributedVarOp' object has no attribute 'get_attr'.
+  except (ValueError, AttributeError):
     return None
 
 

@@ -83,11 +83,8 @@ def do_test(create_signature,
     """Function passed to absl.app.run."""
     if len(argv) > 1:
       raise app.UsageError('Too many command-line arguments.')
-    if FLAGS.save_model_path:
-      save_model_path = FLAGS.save_model_path
-    else:
-      save_model_path = tempfile.mktemp(suffix='.saved_model')
-
+    save_model_path = FLAGS.save_model_path or tempfile.mktemp(
+        suffix='.saved_model')
     signature_def_map, init_op, assets_collection = create_signature()
 
     sess = tf.Session()

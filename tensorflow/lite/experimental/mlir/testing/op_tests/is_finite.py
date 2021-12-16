@@ -49,9 +49,7 @@ def make_is_finite_tests(options):
 
     # Inject NaN and Inf value.
     def random_index(shape):
-      result = []
-      for dim in shape:
-        result.append(np.random.randint(low=0, high=dim))
+      result = [np.random.randint(low=0, high=dim) for dim in shape]
       return tuple(result)
 
     input_values[random_index(input_values.shape)] = np.Inf

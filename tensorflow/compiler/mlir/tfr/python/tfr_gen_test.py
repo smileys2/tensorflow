@@ -243,14 +243,12 @@ def _tfr_quant_test(x):
   (qmin, qmax)  # pylint: disable=pointless-statement
   d = _tfr_quant_rescale(y, s, 0)
   e = math_ops.Cast(x=d, DstT=dtypes.int16)
-  f = math_ops.Cast(x=e, DstT=dtypes.int8)
-  return f
+  return math_ops.Cast(x=e, DstT=dtypes.int8)
 
 
 @composite.Composite('TestIdentityNOp')
 def _tfr_quant_test_n(x):
-  y = _tfr_quant_raw_data(x)
-  return y
+  return _tfr_quant_raw_data(x)
 
 
 class TFRGenTestBase(test.TestCase):

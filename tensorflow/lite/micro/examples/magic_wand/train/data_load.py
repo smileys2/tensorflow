@@ -53,7 +53,7 @@ class DataLoader(object):
     label = []
     with open(data_path, "r") as f:
       lines = f.readlines()
-      for idx, line in enumerate(lines):  # pylint: disable=unused-variable
+      for line in lines:
         dic = json.loads(line)
         data.append(dic[DATA_NAME])
         label.append(dic[LABEL_NAME])

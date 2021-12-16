@@ -216,9 +216,9 @@ class OpHint(object):
       """
       if index_override is None:
         global_index = self._next_global_index
+      elif index_override in self._used_global_indices:
+        raise ValueError("Index %d was already used by another call to add")
       else:
-        if index_override in self._used_global_indices:
-          raise ValueError("Index %d was already used by another call to add")
         global_index = index_override
       # Make next_global_index valid
       self._used_global_indices.add(global_index)
@@ -573,9 +573,7 @@ class _LiteAggregateOperand(_LiteOperand):
         self.flattened = self.flattened[:1]
       elif self.aggregation == OpHint.AGGREGATE_LAST:
         self.flattened = self.flattened[-1:]
-      elif self.aggregation == OpHint.AGGREGATE_STACK:
-        pass
-      else:
+      elif self.aggregation != OpHint.AGGREGATE_STACK:
         raise ValueError("Invalid aggregation type %r specified" %
                          self.aggregation)
     return self.flattened
@@ -600,21 +598,19 @@ class _LiteAggregateOperand(_LiteOperand):
       The name of a pack that aggregates this node.
     """
     flattened = self.flatten_nodes()
-    if (self.aggregation == OpHint.AGGREGATE_FIRST) or (
-        self.aggregation == OpHint.AGGREGATE_LAST):
+    if self.aggregation in [OpHint.AGGREGATE_FIRST, OpHint.AGGREGATE_LAST]:
       assert len(flattened) == 1
     if len(flattened) == 1 and self.aggregation != OpHint.AGGREGATE_STACK:
       return _tensor_name_base(flattened[0].name)
-    else:
-      new_node = _node_def_pb2.NodeDef()
-      new_node.op = "Pack"
-      new_node.name = "OpHintStack-%s" % flattened[0].name
-      new_node.attr["N"].i = len(flattened)
-      new_node.attr["T"].type = flattened[0].attr["T"].type
-      for discrete in flattened:
-        new_node.input.append(_tensor_name_base(discrete.name))
-      out_graphdef.node.extend([new_node])
-      return new_node.name
+    new_node = _node_def_pb2.NodeDef()
+    new_node.op = "Pack"
+    new_node.name = "OpHintStack-%s" % flattened[0].name
+    new_node.attr["N"].i = len(flattened)
+    new_node.attr["T"].type = flattened[0].attr["T"].type
+    for discrete in flattened:
+      new_node.input.append(_tensor_name_base(discrete.name))
+    out_graphdef.node.extend([new_node])
+    return new_node.name
 
   def aggregate_and_return_name_for_output(self, fused_op_name, output_index,
                                            out_graphdef):
@@ -634,8 +630,7 @@ class _LiteAggregateOperand(_LiteOperand):
       op).
     """
     flattened = self.flatten_nodes()
-    if (self.aggregation == OpHint.AGGREGATE_FIRST) or (
-        self.aggregation == OpHint.AGGREGATE_LAST):
+    if self.aggregation in [OpHint.AGGREGATE_FIRST, OpHint.AGGREGATE_LAST]:
       assert len(flattened) == 1
     if len(flattened) == 1 and self.aggregation != OpHint.AGGREGATE_STACK:
       temp_op = _LiteSingleOperand(flattened[0])
@@ -713,10 +708,8 @@ class _LiteFuncCall(object):
   def __str__(self):
 
     def format_args(items):
-      s = ""
-      for idx, item in items.iteritems():
-        s += ("\t\t%d:\n" % idx) + str(item)
-      return s
+      return "".join(
+          ("\t\t%d:\n" % idx) + str(item) for idx, item in items.iteritems())
 
     inputs_str = "\tInputs\n" + format_args(self.inputs)
     outputs_str = "\tOutputs\n" + format_args(self.outputs)
@@ -793,8 +786,7 @@ def _find_all_hints_in_nodes(nodes):
 
 
 def _extract_topology_sequence_mapping(nodes):
-  return dict(
-      (_tensor_name_base(node.name), idx) for idx, node in enumerate(nodes))
+  return {_tensor_name_base(node.name): idx for idx, node in enumerate(nodes)}
 
 
 def _find_children_hints_in_while_loop(function_def, nodes_mapping):
@@ -860,25 +852,25 @@ def _find_children_hints(call, graph_def):
   for node in graph_def.node:
     out.node.extend([_copy.deepcopy(node)])
     n = _tensor_name_base(node.name)
-    if n in reachable_by_output:
-      if n not in reachable_by_input and n not in output_nodes_set:
-        # special handle for while loop function def.
-        if node.op == "While" or node.op == "StatelessWhile":
-          body_name = node.attr["body"].func.name
-          inputs_outside_loop = node.input
-          for function_def in graph_def.library.function:
-            if function_def.signature.name == body_name:
-              function_inputs = function_def.signature.input_arg
-              assert len(inputs_outside_loop) == len(function_inputs)
-              nodes_mapping = {}
-              for i, function_input in enumerate(function_inputs):
-                nodes_mapping[function_input.name] = inputs_outside_loop[i]
-              (children_hints_in_loop,
-               new_nodes) = _find_children_hints_in_while_loop(
-                   function_def, nodes_mapping)
-              function_def_nodes.update([x.name for x in new_nodes])
-              children_hints.extend(children_hints_in_loop)
-              out.node.extend(new_nodes)
+    if (n in reachable_by_output and n not in reachable_by_input
+        and n not in output_nodes_set
+        and node.op in ["While", "StatelessWhile"]):
+      body_name = node.attr["body"].func.name
+      inputs_outside_loop = node.input
+      for function_def in graph_def.library.function:
+        if function_def.signature.name == body_name:
+          function_inputs = function_def.signature.input_arg
+          assert len(inputs_outside_loop) == len(function_inputs)
+          nodes_mapping = {
+              function_input.name: inputs_outside_loop[i]
+              for i, function_input in enumerate(function_inputs)
+          }
+          (children_hints_in_loop,
+           new_nodes) = _find_children_hints_in_while_loop(
+               function_def, nodes_mapping)
+          function_def_nodes.update([x.name for x in new_nodes])
+          children_hints.extend(children_hints_in_loop)
+          out.node.extend(new_nodes)
 
   return children_hints, out, function_def_nodes
 
@@ -972,18 +964,13 @@ def _convert_single_op_hint_to_stub(call,
   # after fusing).
   for node in graph_def.node:
     n = _tensor_name_base(node.name)
-    if n in reachable_by_output:
-      if n not in reachable_by_input and n not in output_nodes_set:
-        nodes_deleted_by_fuse.add(n)
-    elif n not in reachable_by_input and n not in function_def_nodes:
-      # n is a node that after all the fusings, so keep it.
+    if (n in reachable_by_output and n not in reachable_by_input
+        and n not in output_nodes_set):
+      nodes_deleted_by_fuse.add(n)
+    elif n not in reachable_by_output and (n not in reachable_by_input
+                                           and n not in function_def_nodes
+                                           or not is_last_run):
       nodes_after_fuse.append(n)
-    else:
-      # In the last run, n is a node that is randomly in the graph but not
-      # connected to the chain of dependencies, we will delete n, otherwise
-      # we keep them.
-      if not is_last_run:
-        nodes_after_fuse.append(n)
 
   # Make a new graphdef with all the pre-input and input nodes
   out = _graph_pb2.GraphDef()
@@ -1047,10 +1034,8 @@ def _convert_single_op_hint_to_stub(call,
 
   # Add post output nodes that do not depend on the outputs
   for n in nodes_after_fuse:
-    should_keep = True
-    for input_name in name_to_input_name[n]:
-      if input_name in nodes_deleted_by_fuse:
-        should_keep = False
+    should_keep = all(input_name not in nodes_deleted_by_fuse
+                      for input_name in name_to_input_name[n])
     if should_keep:
       out.node.extend([_copy.deepcopy(name_to_node[n])])
 
@@ -1184,10 +1169,7 @@ def _convert_op_hints_to_stubs_helper(
   """
   hints = _find_all_hints_in_nodes(graph_def.node)
 
-  hints_q = []
-  for hint in _six.itervalues(hints):
-    hints_q.append((hint.level, hint.uuid))
-
+  hints_q = [(hint.level, hint.uuid) for hint in _six.itervalues(hints)]
   hints_q.sort(key=lambda tup: tup[0])
   for i in range(len(hints_q) - 1, -1, -1):
     level, hint_uuid = hints_q[i]

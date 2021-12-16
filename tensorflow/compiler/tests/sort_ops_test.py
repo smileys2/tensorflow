@@ -44,7 +44,7 @@ class XlaSortOpTest(xla_test.XLATestCase, parameterized.TestCase):
             array_ops.placeholder(dtypes.as_dtype(arg.dtype), arg.shape)
             for arg in args
         ]
-        feeds = {placeholders[i]: args[i] for i in range(0, len(args))}
+        feeds = {placeholders[i]: args[i] for i in range(len(args))}
         output = op(*placeholders)
         if isinstance(output, ops.Tensor):
           output = [output]

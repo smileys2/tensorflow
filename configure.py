@@ -115,11 +115,10 @@ def symlink_force(target, link_name):
   try:
     os.symlink(target, link_name)
   except OSError as e:
-    if e.errno == errno.EEXIST:
-      os.remove(link_name)
-      os.symlink(target, link_name)
-    else:
+    if e.errno != errno.EEXIST:
       raise e
+    os.remove(link_name)
+    os.symlink(target, link_name)
 
 
 def sed_in_place(filename, old, new):
@@ -189,11 +188,7 @@ def get_python_path(environ_cp, python_bin_path):
   # Sort set so order is deterministic
   all_paths = sorted(all_paths)
 
-  paths = []
-  for path in all_paths:
-    if os.path.isdir(path):
-      paths.append(path)
-  return paths
+  return [path for path in all_paths if os.path.isdir(path)]
 
 
 def get_python_major_version(python_bin_path):
@@ -332,11 +327,7 @@ def get_var(environ_cp,
   yes_reply += '\n'
   no_reply += '\n'
 
-  if enabled_by_default:
-    question += ' [Y/n]: '
-  else:
-    question += ' [y/N]: '
-
+  question += ' [Y/n]: ' if enabled_by_default else ' [y/N]: '
   var = environ_cp.get(var_name)
   if var is not None:
     var_content = var.strip().lower()
@@ -357,19 +348,13 @@ def get_var(environ_cp,
   while var is None:
     user_input_origin = get_input(question)
     user_input = user_input_origin.strip().lower()
-    if user_input == 'y':
+    if (user_input != 'y' and user_input != 'n' and not user_input
+        and enabled_by_default or user_input == 'y'):
       print(yes_reply)
       var = True
-    elif user_input == 'n':
+    elif user_input != 'n' and not user_input or user_input == 'n':
       print(no_reply)
       var = False
-    elif not user_input:
-      if enabled_by_default:
-        print(yes_reply)
-        var = True
-      else:
-        print(no_reply)
-        var = False
     else:
       print('Invalid selection: {}'.format(user_input_origin))
   return var
@@ -1328,7 +1313,7 @@ def main():
   if is_macos():
     environ_cp['TF_NEED_TENSORRT'] = '0'
 
-  with_xla_support = environ_cp.get('TF_ENABLE_XLA', None)
+  with_xla_support = environ_cp.get('TF_ENABLE_XLA')
   if with_xla_support is not None:
     write_to_bazelrc('build --define=with_xla_support=%s' %
                      ('true' if int(with_xla_support) else 'false'))
@@ -1416,11 +1401,8 @@ def main():
       else:
         # Use downloaded LLD for linking.
         write_to_bazelrc('build:cuda_clang --config=download_clang_use_lld')
-    else:
-      # Set up which gcc nvcc should use as the host compiler
-      # No need to set this on Windows
-      if not is_windows():
-        set_gcc_host_compiler_path(environ_cp)
+    elif not is_windows():
+      set_gcc_host_compiler_path(environ_cp)
     set_other_cuda_vars(environ_cp)
   else:
     # CUDA not required. Ask whether we should download the clang toolchain and

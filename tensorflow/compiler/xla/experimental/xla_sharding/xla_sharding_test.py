@@ -117,8 +117,7 @@ class XlaShardingTest(test_util.TensorFlowTestCase):
 
     @def_function.function
     def split_helper(tensor):
-      split_tensor = xla_sharding.split(tensor, 0, 8)
-      return split_tensor
+      return xla_sharding.split(tensor, 0, 8)
 
     with self.assertRaises(ValueError):
       _ = split_helper(array_ops.ones([4, 5, 6], dtype=dtypes.float32))

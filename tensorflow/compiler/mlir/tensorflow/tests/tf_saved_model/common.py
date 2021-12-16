@@ -76,10 +76,8 @@ def do_test(create_module_fn, exported_names=None, show_debug_info=False):
     """Function passed to absl.app.run."""
     if len(argv) > 1:
       raise app.UsageError('Too many command-line arguments.')
-    if FLAGS.save_model_path:
-      save_model_path = FLAGS.save_model_path
-    else:
-      save_model_path = tempfile.mkdtemp(suffix='.saved_model')
+    save_model_path = FLAGS.save_model_path or tempfile.mkdtemp(
+        suffix='.saved_model')
     save_options = tf.saved_model.SaveOptions(save_debug_info=show_debug_info)
     tf.saved_model.save(
         create_module_fn(), save_model_path, options=save_options)

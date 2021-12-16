@@ -79,7 +79,7 @@ def repack_diagonals_in_tests(tests, align=None):
   if align == default_v2_alignment or align is None:
     return tests
 
-  new_tests = dict()
+  new_tests = {}
   # Loops through each case.
   for diag_index, (packed_diagonals, padded_diagonals) in tests.items():
     num_rows, num_cols = padded_diagonals.shape[-2:]
@@ -104,7 +104,7 @@ def square_cases(align=None):
                    [1, 2, 3, 4, 5],
                    [6, 7, 8, 9, 1],
                    [2, 3, 4, 5, 6]]])
-  tests = dict()
+  tests = {}
   # tests[d_lower, d_upper] = (compact_diagonals, padded_diagonals)
   tests[-1, -1] = (np.array([[6, 4, 1, 7],
                              [5, 2, 8, 5]]),
@@ -182,7 +182,7 @@ def tall_cases(align=None):
                    [4, 5, 6],
                    [7, 8, 9],
                    [9, 8, 7]]])
-  tests = dict()
+  tests = {}
   # tests[d_lower, d_upper] = (compact_diagonals, padded_diagonals)
   tests[0, 0] = (np.array([[1, 5, 9],
                            [3, 2, 6]]),
@@ -266,7 +266,7 @@ def fat_cases(align=None):
                   [[4, 5, 6, 7],
                    [8, 9, 1, 2],
                    [3, 4, 5, 6]]])
-  tests = dict()
+  tests = {}
   # tests[d_lower, d_upper] = (compact_diagonals, padded_diagonals)
   tests[0, 0] = (np.array([[1, 6, 2],
                            [4, 9, 5]]),
@@ -411,7 +411,7 @@ class MatrixDiagTest(xla_test.XLATestCase):
   def testRectangularBatch(self):
     # Stores expected num_rows and num_cols (when the other is given).
     # expected[(d_lower, d_upper)] = (expected_num_rows, expected_num_cols)
-    test_list = list()
+    test_list = []
 
     # Do not align the test cases here. Re-alignment needs to happen after the
     # solution shape is updated.
@@ -554,7 +554,7 @@ class MatrixSetDiagTest(xla_test.XLATestCase):
   # Generic tests applicable to both v1 and v2 ops.
   # Originally from binary_ops_tests.py.
   def testV1(self):
-    test_cases = list()
+    test_cases = []
 
     # pyformat: disable
     # pylint: disable=bad-whitespace

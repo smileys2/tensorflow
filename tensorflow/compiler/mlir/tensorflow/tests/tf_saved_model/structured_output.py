@@ -115,10 +115,7 @@ class TestModule(tf.Module):
   # CHECK-SAME: attributes {{.*}} tf_saved_model.exported_names = ["f0006_multiple_return_statements"]
   @tf.function(input_signature=[tf.TensorSpec([], tf.float32)])
   def f0006_multiple_return_statements(self, x):
-    if x > 3.:
-      return {'x': tf.constant(1.0, shape=[1])}
-    else:
-      return {'x': tf.constant(1.0, shape=[1])}
+    return {'x': tf.constant(1.0, shape=[1])}
 
 
 if __name__ == '__main__':

@@ -95,25 +95,22 @@ def wav_to_features(sample_rate, clip_duration_ms, window_size_ms,
             (variable_base, model_settings['fingerprint_width']))
     f.write('const int g_%s_height = %d;\n' %
             (variable_base, model_settings['spectrogram_length']))
+    i = 0
     if quantize:
       features_min, features_max = input_data.get_features_range(model_settings)
       f.write('const unsigned char g_%s_data[] = {' % variable_base)
-      i = 0
       for value in features.flatten():
         quantized_value = int(
             round(
                 (255 * (value - features_min)) / (features_max - features_min)))
-        if quantized_value < 0:
-          quantized_value = 0
-        if quantized_value > 255:
-          quantized_value = 255
+        quantized_value = max(quantized_value, 0)
+        quantized_value = min(quantized_value, 255)
         if i == 0:
           f.write('\n  ')
         f.write('%d, ' % (quantized_value))
         i = (i + 1) % 10
     else:
       f.write('const float g_%s_data[] = {\n' % variable_base)
-      i = 0
       for value in features.flatten():
         if i == 0:
           f.write('\n  ')

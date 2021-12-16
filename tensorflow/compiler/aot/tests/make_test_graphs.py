@@ -195,9 +195,7 @@ def export_debug_info(exported_graph):
   Returns:
     Corresponding GraphDebugInfo with traces for all ops in exported_graph.
   """
-  exported_operations = []
-  for op in exported_graph.get_operations():
-    exported_operations.append(('', op))
+  exported_operations = [('', op) for op in exported_graph.get_operations()]
   return error_interpolation.create_graph_debug_info_def(exported_operations)
 
 

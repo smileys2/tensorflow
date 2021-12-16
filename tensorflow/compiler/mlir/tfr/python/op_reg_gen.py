@@ -71,10 +71,10 @@ class OpRegGenImpl(transformer.CodeGenerator):
     elif len(compose_dec) > 1:
       raise KeyError('More than one TF ops decomposes for.')
 
-    all_dec_args = {}
-    for arg_name, arg_value in zip(_COMPOSITE_ARG_LIST, compose_dec[0].args):
-      all_dec_args[arg_name] = self.visit(arg_value)
-
+    all_dec_args = {
+        arg_name: self.visit(arg_value)
+        for arg_name, arg_value in zip(_COMPOSITE_ARG_LIST, compose_dec[0].args)
+    }
     kw_dec_args = dict([self.visit(kw) for kw in compose_dec[0].keywords])
 
     if all_dec_args.keys() & kw_dec_args.keys():

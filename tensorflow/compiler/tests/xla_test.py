@@ -69,12 +69,13 @@ def parse_disabled_manifest(manifest_content):
       raise ValueError('Bad entry in manifest file.')
 
   disabled_regex = '|'.join(disabled_tests)
-  method_types_filter = {}
-  for method, types in disabled_method_types:
-    method_types_filter[method] = set([
-        dtypes.as_dtype(types_pb2.DataType.Value(name)).as_numpy_dtype
-        for name in types
-    ])
+  method_types_filter = {
+      method: {
+          dtypes.as_dtype(types_pb2.DataType.Value(name)).as_numpy_dtype
+          for name in types
+      }
+      for method, types in disabled_method_types
+  }
   return disabled_regex, method_types_filter
 
 
@@ -96,43 +97,39 @@ class XLATestCase(test.TestCase):
 
     self.device = FLAGS.test_device
     self.has_custom_call = (self.device == 'XLA_CPU')
-    self._all_tf_types = set([
+    self._all_tf_types = {
         dtypes.as_dtype(types_pb2.DataType.Value(name))
         for name in FLAGS.types.split(',')
-    ])
-    self.int_tf_types = set([
-        dtype for dtype in self._all_tf_types if dtype.is_integer
-    ])
-    self._float_tf_types = set([
-        dtype for dtype in self._all_tf_types if dtype.is_floating
-    ])
-    self.complex_tf_types = set([
-        dtype for dtype in self._all_tf_types if dtype.is_complex
-    ])
+    }
+    self.int_tf_types = {dtype for dtype in self._all_tf_types if dtype.is_integer}
+    self._float_tf_types = {
+        dtype
+        for dtype in self._all_tf_types if dtype.is_floating
+    }
+    self.complex_tf_types = {
+        dtype
+        for dtype in self._all_tf_types if dtype.is_complex
+    }
     self._numeric_tf_types = set(
         self.int_tf_types | self._float_tf_types | self.complex_tf_types)
-    self.quantized_tf_types = set(
-        dtype for dtype in self._all_tf_types if dtype.is_quantized)
+    self.quantized_tf_types = {
+        dtype
+        for dtype in self._all_tf_types if dtype.is_quantized
+    }
 
     # Quantized types don't have a numpy equivalent, include them in
     # all_tf_types but not in all_types.
     # TODO(b/115960798): Parametrize tests on TF types instead of numpy types
     # and remove all_types.
-    self._all_types = set(dtype.as_numpy_dtype
-                          for dtype in self._all_tf_types
-                          if not dtype.is_quantized)
-    self._int_types = set([dtype.as_numpy_dtype for dtype in self.int_tf_types])
-    self.signed_int_types = set(dtype.as_numpy_dtype
-                                for dtype in self.int_tf_types
-                                if not dtype.is_unsigned)
-    self.unsigned_int_types = set(dtype.as_numpy_dtype
-                                  for dtype in self.int_tf_types
-                                  if dtype.is_unsigned)
-    self._float_types = set(
-        [dtype.as_numpy_dtype for dtype in self._float_tf_types])
-    self.complex_types = set([
-        dtype.as_numpy_dtype for dtype in self.complex_tf_types
-    ])
+    self._all_types = {dtype.as_numpy_dtype for dtype in self._all_tf_types
+                            if not dtype.is_quantized}
+    self._int_types = {dtype.as_numpy_dtype for dtype in self.int_tf_types}
+    self.signed_int_types = {dtype.as_numpy_dtype for dtype in self.int_tf_types
+                                  if not dtype.is_unsigned}
+    self.unsigned_int_types = {dtype.as_numpy_dtype for dtype in self.int_tf_types
+                                    if dtype.is_unsigned}
+    self._float_types = {dtype.as_numpy_dtype for dtype in self._float_tf_types}
+    self.complex_types = {dtype.as_numpy_dtype for dtype in self.complex_tf_types}
     self._numeric_types = set(self._int_types | self._float_types
                               | self.complex_types)
 
@@ -160,8 +157,10 @@ class XLATestCase(test.TestCase):
   @property
   def all_tf_types(self):
     name = '{}.{}'.format(type(self).__name__, self._testMethodName)
-    tf_types = set([dtypes.as_dtype(t)
-                    for t in self._method_types_filter.get(name, set())])
+    tf_types = {
+        dtypes.as_dtype(t)
+        for t in self._method_types_filter.get(name, set())
+    }
     return self._all_tf_types - tf_types
 
   @property
@@ -182,8 +181,10 @@ class XLATestCase(test.TestCase):
   @property
   def numeric_tf_types(self):
     name = '{}.{}'.format(type(self).__name__, self._testMethodName)
-    tf_types = set([dtypes.as_dtype(t)
-                    for t in self._method_types_filter.get(name, set())])
+    tf_types = {
+        dtypes.as_dtype(t)
+        for t in self._method_types_filter.get(name, set())
+    }
     return self._numeric_tf_types - tf_types
 
   @property

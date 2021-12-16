@@ -53,9 +53,10 @@ def make_irfft2d_tests(options):
     return [input_value], [outs]
 
   def build_inputs(parameters, sess, inputs, outputs):
-    rfft_length = []
-    rfft_length.append(parameters["input_shape"][-2])
-    rfft_length.append((parameters["input_shape"][-1] - 1) * 2)
+    rfft_length = [
+        parameters["input_shape"][-2],
+        (parameters["input_shape"][-1] - 1) * 2,
+    ]
     rfft_input = create_tensor_data(np.float32, parameters["input_shape"])
     rfft_result = np.fft.rfft2(rfft_input, rfft_length)
 

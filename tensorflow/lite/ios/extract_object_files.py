@@ -68,7 +68,7 @@ def extract_object_files(archive_file: io.BufferedIOBase,
 
   # Keep the extracted file names and their content hash values, in order to
   # handle duplicate names correctly.
-  extracted_files = dict()
+  extracted_files = {}
 
   for name, file_content in _extract_next_file(archive_file):
     digest = hashlib.md5(file_content).digest()

@@ -187,8 +187,7 @@ class ConverterMetricsTest(test_util.TensorFlowTestCase):
     def func(inp):
       conv = tf.nn.conv2d(
           inp, tf.ones([3, 3, 3, 16]), strides=[1, 1, 1, 1], padding='SAME')
-      output = tf.nn.relu(conv, name='output')
-      return output
+      return tf.nn.relu(conv, name='output')
 
     def calibration_gen():
       for _ in range(5):
@@ -343,7 +342,7 @@ def mock_ngrams(data, width, axis=-1, string_separator=' ', name=None):
       data = ragged_tensor.convert_to_tensor_or_ragged_tensor(data, name='data')
       slices = []
       for start in range(width):
-        stop = None if start - width + 1 == 0 else start - width + 1
+        stop = None if start - width == -1 else start - width + 1
         if axis >= 0:
           idx = [slice(None)] * axis + [slice(start, stop)]
         else:

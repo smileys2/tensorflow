@@ -168,8 +168,7 @@ class EagerTest(xla_test.XLATestCase):
       v0 = resource_variable_ops.ResourceVariable(1.0)
 
       def f():
-        x = v0 * v0
-        return x
+        return v0 * v0
 
       grads = backprop.implicit_grad(f)()
     self.assertEqual(2., grads[0][0].numpy())
@@ -185,9 +184,7 @@ class EagerTest(xla_test.XLATestCase):
       # Read the same variable 100 times. If the underlying tensor
       # is not copied, this is a trivial operation. If it is copied,
       # this will eat over 13GB and OOM.
-      values = []
-      for _ in range(100):
-        values.append(var.value())
+      values = [var.value() for _ in range(100)]
 
   # The shape, shape_n, size, and rank are tested here because their
   # execution kernels (as opposed to compilation only tf2xla kernels)
@@ -504,8 +501,7 @@ class EagerFunctionTest(xla_test.XLATestCase):
         x = constant_op.constant(1.0)
         with backprop.GradientTape() as tape:
           y = v0 * x
-        dy = tape.gradient(y, v0)
-        return dy
+        return tape.gradient(y, v0)
 
       dy = f()
       self.assertEqual(1.0, dy.numpy())
