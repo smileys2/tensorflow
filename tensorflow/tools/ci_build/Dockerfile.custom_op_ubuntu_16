@@ -76,4 +76,3 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.6 0
 ARG TF_PACKAGE=tensorflow
 ARG TF_PACKAGE_VERSION=
 RUN pip3 install ${TF_PACKAGE}-cpu${TF_PACKAGE_VERSION:+==${TF_PACKAGE_VERSION}}
-
