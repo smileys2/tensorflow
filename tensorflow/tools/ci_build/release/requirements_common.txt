@@ -32,3 +32,4 @@ tf-estimator-nightly ~= 2.6.0.dev
 grpcio ~= 1.38.0
 portpicker ~= 1.4.0
 scipy ~= 1.5.4  # NOTE: not the latest version due to py3.6
+requests>=2.32.0 # not directly required, pinned by Snyk to avoid a vulnerability
