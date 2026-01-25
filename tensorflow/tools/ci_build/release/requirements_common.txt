@@ -14,7 +14,7 @@ protobuf >= 3.17.1
 six ~= 1.16.0
 termcolor ~= 1.1.0
 typing_extensions ~= 3.10.0.0
-wheel ~= 0.36.2
+wheel~=0.46.2
 wrapt ~= 1.12.1
 
 # We need to pin the gast dependency exactly
@@ -32,3 +32,4 @@ tf-estimator-nightly ~= 2.6.0.dev
 grpcio ~= 1.38.0
 portpicker ~= 1.4.0
 scipy ~= 1.5.4  # NOTE: not the latest version due to py3.6
+pyasn1>=0.6.2 # not directly required, pinned by Snyk to avoid a vulnerability
